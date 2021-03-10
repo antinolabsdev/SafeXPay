@@ -10,15 +10,16 @@ import UIKit
 
 class PaymentModeCell: UITableViewCell {
 
+    @IBOutlet weak var paymentModeImage: UIImageView!
+    @IBOutlet weak var paymentModeLabel: UILabel!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    
+    func setData(mode: PaymentMode){
+        self.paymentModeLabel.text = mode.paymentMode
+        self.paymentModeImage.image = UIImage(named: mode.payModeID, in: safexBundle, compatibleWith: nil)
     }
     
 }

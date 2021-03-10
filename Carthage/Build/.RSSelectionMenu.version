@@ -1,0 +1,10 @@
+{
+  "commitish" : "v7.1.2",
+  "iOS" : [
+    {
+      "name" : "RSSelectionMenu",
+      "hash" : "a723d15790daa303a1448885e3e6cc95be3e985959dde1769aa4fbe74f78d091",
+      "swiftToolchainVersion" : "5.2.4 (swiftlang-1103.0.32.9 clang-1103.0.32.53)"
+    }
+  ]
+}

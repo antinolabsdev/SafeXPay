@@ -11,11 +11,15 @@ import UIKit
 class CardView: UIView {
     
     // MARK:- Outlets
+    @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var titleLbl: UILabel!
+    @IBOutlet weak var titleImg: UIImageView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var payBtn: UIButton!
     
     // MARK:- Properties
     var isSectionExpanded = false
+    var delegate: DetailViewProtocol?
     
     // MARK:- Lifecycle
     override init(frame: CGRect) {
@@ -27,16 +31,25 @@ class CardView: UIView {
     }
 
     // MARK:- Helpers
+    func setupCardView(info: PaymentMode){
+        self.titleLbl.text = info.paymentMode
+        self.titleImg.image = UIImage(named: info.payModeID, in: safexBundle, compatibleWith: nil)
+        self.payBtn.backgroundColor = headerColor
+        self.payBtn.layer.cornerRadius = 2
+        self.payBtn.layer.masksToBounds = true
+        self.setupTableView()
+    }
+    
     func setupTableView(){
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.register(UINib(nibName: "AddCardCell", bundle: safexBundle), forCellReuseIdentifier: "AddCardCell")
         self.tableView.register(UINib(nibName: "SavedCardCollection", bundle: safexBundle), forCellReuseIdentifier: "SavedCardCollection")
         self.tableView.register(UINib(nibName: "SavedCardsHeader", bundle: safexBundle), forHeaderFooterViewReuseIdentifier: "SavedCardsHeader")
-        
-        self.payBtn.applyGradient(colours: gradientColors)
-        self.payBtn.layer.cornerRadius = 2
-        self.payBtn.layer.masksToBounds = true
+    }
+    
+    @IBAction func backToMainPressed(_ sender: UIButton) {
+        self.delegate?.backToMain()
     }
 }
 

@@ -8,14 +8,25 @@
 
 import UIKit
 
+protocol SavedCardsHeaderProtocol {
+    func sectionExpandPressed(tag: Int, view: SavedCardsHeader)
+}
+
 class SavedCardsHeader: UITableViewHeaderFooterView {
 
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
+    @IBOutlet weak var sectionTypeLabel: UILabel!
+    @IBOutlet weak var sectionExpandButton: UIButton!
+    
+    var delegate: SavedCardsHeaderProtocol?
+    
+    override func awakeFromNib() {}
+    
+    func setdata(headerLbl:String){
+        self.sectionTypeLabel.text = headerLbl
     }
-    */
+    
+    @IBAction func sectionExpandPressed(_ sender: UIButton) {
+        self.delegate?.sectionExpandPressed(tag: self.tag, view: self)
+    }
 
 }

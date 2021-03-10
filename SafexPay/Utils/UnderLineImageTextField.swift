@@ -1,5 +1,5 @@
 //
-//  UITextField.swift
+//  UnderLineImageTextField.swift
 //  SafexPay
 //
 //  Created by Sandeep on 8/7/20.
@@ -10,11 +10,11 @@ import UIKit
 
 @IBDesignable
 class UnderLineImageTextField: UITextField {
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         
         let borderLayer = CALayer()
         let widthOfBorder = getBorderWidht()
-        borderLayer.frame = CGRectMake(-15, self.frame.size.height - widthOfBorder, self.frame.size.width+20, self.frame.size.height)
+        borderLayer.frame = CGRect(x: -15, y: self.frame.size.height - widthOfBorder, width: self.frame.size.width+20, height: self.frame.size.height)
         borderLayer.borderWidth = widthOfBorder
         borderLayer.borderColor = getBottomLineColor()
         self.layer.addSublayer(borderLayer)
@@ -25,19 +25,33 @@ class UnderLineImageTextField: UITextField {
     
     
     //MARK : set the image LeftSide
-    @IBInspectable var SideImage:UIImage? {
+    @IBInspectable var LeftSideImage:UIImage? {
         didSet{
             
-            let leftAddView = UIView.init(frame: CGRectMake(0, 0, 25, self.frame.size.height-10))
-            let leftimageView = UIImageView.init(frame: CGRectMake(0, 0, 20, 20))//Create a imageView for left side.
-            leftimageView.image = SideImage
+            let leftAddView = UIView.init(frame: CGRect(x: 0, y: 0, width: self.frame.size.height, height: self.frame.size.height))
+            let leftimageView = UIImageView.init(frame: CGRect(x: self.frame.size.height/4, y: self.frame.size.height/4, width: self.frame.size.height/2, height: self.frame.size.height/2))//Create a imageView for left side.
+            leftimageView.image = LeftSideImage
             leftAddView.addSubview(leftimageView)
             self.leftView = leftAddView
-            self.leftViewMode = UITextFieldViewMode.Always
+            self.leftViewMode = UITextField.ViewMode.always
         }
         
     }
-    @IBInspectable var bottomLineColor: UIColor = UIColor.blackColor() {
+    
+    //MARK : set the image RightSide
+    @IBInspectable var RightSideImage:UIImage? {
+        didSet{
+            
+            let rightAddView = UIView.init(frame: CGRect(x: 0, y: 0, width: 25, height: self.frame.size.height-10))
+            let rightimageView = UIImageView.init(frame: CGRect(x: 0, y: 0, width: 20, height: 20))//Create a imageView for right side.
+            rightimageView.image = RightSideImage
+            rightAddView.addSubview(rightimageView)
+            self.rightView = rightAddView
+            self.rightViewMode = UITextField.ViewMode.always
+        }
+        
+    }
+    @IBInspectable var bottomLineColor: UIColor = UIColor.black {
         didSet {
             
         }
@@ -45,7 +59,7 @@ class UnderLineImageTextField: UITextField {
     
     
     func getBottomLineColor() -> CGColor {
-        return bottomLineColor.CGColor;
+        return bottomLineColor.cgColor;
         
     }
     @IBInspectable var cusborderWidth:CGFloat = 1.0

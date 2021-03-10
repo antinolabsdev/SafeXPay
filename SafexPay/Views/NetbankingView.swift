@@ -10,14 +10,17 @@ import UIKit
 import RSSelectionMenu
 import KRProgressHUD
 
-protocol NetbankingViewProtocol {
-    func showBankOptions(data: [String])
+protocol DetailViewProtocol {
     func openWebURL(html: String)
+    func backToMain()
 }
 
 class NetbankingView: UIView {
     
     // MARK:- Outlets
+    @IBOutlet weak var backButton: UIButton!
+    @IBOutlet weak var titleLbl: UILabel!
+    @IBOutlet weak var titleImg: UIImageView!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var bankNameLbl: UILabel!
     @IBOutlet weak var payBtn: UIButton!
@@ -25,8 +28,7 @@ class NetbankingView: UIView {
     // MARK:- Properties
     let bankImages = ["axis","hdfc","icici","kotakbank","yesbank","sbi"]
     let bankNames = ["Axis","HDFC","ICICI","Kotak","Yes","SBI"]
-    var delegate: NetbankingViewProtocol?
-    var selectedBank = "Select a different bank"
+    var delegate: DetailViewProtocol?
     var mechantId = String.empty
     var price = String.empty
     var orderId = String.empty
@@ -34,6 +36,7 @@ class NetbankingView: UIView {
     private var pgId = String.empty
     private var pgMode = String.empty
     private var schemeId = String.empty
+    var view = UIViewController()
     
     // MARK:- Lifecycle
     override init(frame: CGRect) {
@@ -46,11 +49,13 @@ class NetbankingView: UIView {
 
     // MARK:- Helpers
     
-    func setupNetbankingView(){
-        self.payBtn.applyGradient(colours: gradientColors)
-//        self.bankNameLbl.text = selectedBank
+    func setupNetbankingView(info: PaymentMode){
+        self.titleLbl.text = info.paymentMode
+        self.titleImg.image = UIImage(named: info.payModeID, in: safexBundle, compatibleWith: nil)
+        self.payBtn.backgroundColor = headerColor
         self.payBtn.layer.cornerRadius = 2
         self.payBtn.layer.masksToBounds = true
+        self.pgMode = info.payModeID
         self.setupCollectionView()
     }
     
@@ -62,49 +67,50 @@ class NetbankingView: UIView {
         let textViewRecognizer = UITapGestureRecognizer()
         textViewRecognizer.addTarget(self, action: #selector(openBankList))
         self.bankNameLbl.addGestureRecognizer(textViewRecognizer)
-        
-        
     }
     
     func updateBank(on ViewController: UIViewController) {
-        let selectionMenu = RSSelectionMenu(selectionStyle: .single, dataSource: bankNames) { (cell, data, index) in
-            cell.textLabel?.text = data
+        guard let bankData = self.netbankingData else {return}
+        let selectionMenu = RSSelectionMenu(selectionStyle: .single, dataSource: bankData) { (cell, data, index) in
+            cell.textLabel?.text = data.pgDetailsResponse.pgName
         }
-        
-        let selectedItems = [String]()
+        let selectedItems = [PaymentModeDetailsList]()
         selectionMenu.setSelectedItems(items: selectedItems) { (text, index, selected, selectedItems) in
             if let bankName = text {
                 print("selected Bank: \(bankName)")
-//                self.bankNameLbl.text = bankName
+                self.bankNameLbl.text = bankName.pgDetailsResponse.pgName
+                self.pgId = bankName.pgDetailsResponse.pgID
+                self.schemeId = bankName.schemeDetailsResponse.schemeID
             }
         }
-
-        // customization
-//        selectionMenu.dismissAutomatically = false
         selectionMenu.cellSelectionStyle = .tickmark
         selectionMenu.showEmptyDataLabel(text: "No Data Found")
         selectionMenu.show(style: .alert(title: "Select your bank", action: "Done", height: nil), from: ViewController)
     }
     
     @objc private func openBankList(){
-        self.delegate?.showBankOptions(data: bankNames)
+        self.updateBank(on: self.view)
     }
     
     @IBAction func payBtnPressed(_ sender: UIButton) {
         if self.pgId.isEmpty {
-            print("select a bank")
+            view.showAlert(title: "", message: "Please select a bank.")
             return
         }
         self.startPayment()
     }
     
+    @IBAction func backToMainPressed(_ sender: UIButton) {
+        self.delegate?.backToMain()
+    }
     
 }
 
 extension NetbankingView: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let data = self.netbankingData{
-            return data.count
+            let data2 = Array(data.prefix(6))
+            return data2.count
         }
         return 0
     }
@@ -112,7 +118,8 @@ extension NetbankingView: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "NetbankingCell", for: indexPath) as! NetbankingCell
         if let data = self.netbankingData{
-            cell.setData(data: data[indexPath.row])
+            let data2 = Array(data.prefix(6))
+            cell.setData(data: data2[indexPath.row])
         }
         return cell
     }
@@ -120,8 +127,8 @@ extension NetbankingView: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if let data = self.netbankingData?[indexPath.row]{
             self.pgId = data.pgDetailsResponse.pgID
-            self.pgMode = "NB"
             self.schemeId = data.schemeDetailsResponse.schemeID
+            self.bankNameLbl.text = data.pgDetailsResponse.pgName
         }
     }
     
@@ -148,7 +155,7 @@ extension NetbankingView: UICollectionViewDelegateFlowLayout {
 extension NetbankingView{
     private func startPayment(){
         KRProgressHUD.show()
-        DataClient.paymentCallback(merchantId: self.mechantId, orderId: self.orderId, orderAmount: self.price, countryCode: "IND", currency: "INR", txnType: "SALE", pgId: self.pgId, pgMode: self.pgMode, schemeId: self.schemeId, installmentMonths: "0", customerName: "Sandeep Ahuja", customerEmail: "sandyahuja4@gmail.com", customerMobile: "8800693003", customerUniqueId: "12354", isCustomerLoggedIn: "Y") { (status, data) in
+        DataClient.paymentCallback(merchantId: self.mechantId, orderId: self.orderId, orderAmount: self.price, countryCode: "IND", currency: "INR", txnType: "SALE", pgId: self.pgId, pgMode: self.pgMode, schemeId: self.schemeId, installmentMonths: "7", customerName: "Sandeep Ahuja", customerEmail: "sandyahuja4@gmail.com", customerMobile: "8800693003", customerUniqueId: "12354", isCustomerLoggedIn: "Y") { (status, data) in
             if status{
                 KRProgressHUD.dismiss()
                 if let datahtml = data{

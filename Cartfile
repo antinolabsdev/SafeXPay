@@ -1,0 +1,6 @@
+github "hackiftekhar/IQKeyboardManager"
+github "rushisangani/RSSelectionMenu" ~> 7.1
+github "krzyzanowskim/CryptoSwift"
+github "Alamofire/Alamofire" ~> 5.2
+github "Krimpedance/KRProgressHUD"
+github "onevcat/Kingfisher" ~> 5.0

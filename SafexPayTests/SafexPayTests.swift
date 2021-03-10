@@ -3,7 +3,7 @@
 //  SafexPayTests
 //
 //  Created by Sandeep on 8/4/20.
-//  Copyright © 2020 SandMan. All rights reserved.
+//  Copyright © 2020 Antino Labs. All rights reserved.
 //
 
 import XCTest
